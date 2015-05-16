@@ -2,6 +2,7 @@ package at.cernin.filereadapplication;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -11,6 +12,7 @@ import android.graphics.PixelFormat;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.provider.Settings;
 import android.support.v4.view.MarginLayoutParamsCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
@@ -33,6 +35,8 @@ import android.widget.ToggleButton;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static at.cernin.filereadapplication.Configuration.checkDebug;
+
 
 public class MainActivity extends ActionBarActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
@@ -47,11 +51,16 @@ public class MainActivity extends ActionBarActivity
      */
     private CharSequence mTitle;
 
+    public final Controler controler = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         /* XML designed activity-layout */
+        controler = new Controler(this, R.);
+
         setContentView(R.layout.activity_main);
+        checkDebug(this);
         setLayoutManualy();
 
 
@@ -273,6 +282,9 @@ public class MainActivity extends ActionBarActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            // falsch: Intent intent = new Intent(getString(R.string.settings_activity));
+            Intent intent = new Intent(this, InformationActivity.class);
+            startActivity(intent);
             return true;
         }
 

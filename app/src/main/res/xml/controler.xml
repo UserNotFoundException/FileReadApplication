@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<fragen>
+    <frage>
+        <fragedatei>f0001.svg</fragedatei>
+        <fragetype>1</fragetype>
+        <antworten>
+            <antwort>
+                <antwortdatei>a0001</antwortdatei>
+                <antwortwahr></antwortwahr>
+            </antwort>
+            <antwort>
+                <antwortdatei></antwortdatei>
+                <antwortwahr></antwortwahr>
+            </antwort>
+            <antwort>
+                <antwortdatei></antwortdatei>
+                <antwortwahr></antwortwahr>
+            </antwort>
+            <antwort>
+                <antwortdatei></antwortdatei>
+                <antwortwahr></antwortwahr>
+            </antwort>
+        </antworten>
+    </frage>
+
+</fragen>
