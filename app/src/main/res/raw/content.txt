@@ -1,0 +1,24 @@
+content.txt in res/raw
+The
+quick
+brown
+fox
+jumps
+over
+the
+lazy
+dog
+äöüß
+Das
+ist
+ein
+Test
+der
+viel
+erkennen
+läßt,
+wenn
+man
+ihn
+läßt.
+
