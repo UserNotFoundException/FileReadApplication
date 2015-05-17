@@ -1,19 +1,14 @@
 package at.cernin.filereadapplication;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
-import android.provider.Settings;
-import android.support.v4.view.MarginLayoutParamsCompat;
+import android.os.PersistableBundle;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
@@ -28,13 +23,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.support.v4.widget.DrawerLayout;
-import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ToggleButton;
-
-import java.util.concurrent.atomic.AtomicInteger;
-
 import static at.cernin.filereadapplication.Configuration.checkDebug;
 
 
@@ -51,13 +41,20 @@ public class MainActivity extends ActionBarActivity
      */
     private CharSequence mTitle;
 
-    public final Controler controler = null;
+    /**
+     * Controller der Activity, der die Anzahl und Eigenschaften der Fragen kennt und
+     * verwaltet.
+     */
+    public Controler controler;
+    private final String ITEM_IN_BUNDLE = "Preselected Item";
+    public int itemSelected = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         /* XML designed activity-layout */
-        controler = new Controler(this, R.);
+        controler = new Controler(this, R.raw.controler);
 
         setContentView(R.layout.activity_main);
         checkDebug(this);
@@ -74,6 +71,36 @@ public class MainActivity extends ActionBarActivity
                 (DrawerLayout) findViewById(R.id.drawer_layout));
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
+        super.onSaveInstanceState(outState, outPersistentState);
+
+        // Merkt sich die ausgewählte Frage bei einem Orientierungswechsel des Phones
+        if (outState != null) {
+            outState.putInt(ITEM_IN_BUNDLE, itemSelected);
+        }
+    }
+
+    @Override
+    public void onRestoreInstanceState(Bundle savedInstanceState, PersistableBundle persistentState) {
+        super.onRestoreInstanceState(savedInstanceState, persistentState);
+
+        // Merkt sich die ausgewählte Frage bei einem  Orientierungswechsel des Phones
+        if (savedInstanceState != null) {
+            itemSelected = savedInstanceState.getInt(ITEM_IN_BUNDLE, 0);
+        }
+
+
+    }
+
+    /**
+     * Manageable Controls from all  Methodes
+     */
+    private SVGImageView myView; // View for Question
+    // ToggleButtons for Answers
+    private final int MAXBUTTONS = 4;
+    private SVGImageButton myButton[] = new SVGImageButton[ MAXBUTTONS ];
+
     /*
         Manually designed activity-layout
         Aufbau des Views abhängig vom Display und der Auflösung des Anzeigegeräts
@@ -81,27 +108,23 @@ public class MainActivity extends ActionBarActivity
     */
 
     private void setLayoutManualy() {
-        final int MAXBUTTONS = 4;
         final int[] myColor = {Color.YELLOW,Color.LTGRAY,Color.CYAN,Color.WHITE};
 
         // Image View for SVG-Information
-        ImageView myView = new ImageView( this );
+        myView = new SVGImageView( this );
         myView.setBackgroundColor(Color.GRAY);
         //Drawable myDrawable = new ColorDrawable(Color.GREEN);
-        Drawable myDrawable = new SvgDrawable();
+        //Drawable myDrawable = new SvgDrawable();
         //myView.setBackground(myDrawable);
 
-        // ToggleButtons for Answers
-        ToggleButton myButton[] = new ToggleButton[ MAXBUTTONS ];
-
         for (int i = 0; i < MAXBUTTONS; i++) {
-            myButton[i] = new ToggleButton( this );
+            myButton[i] = new SVGImageButton( this );
             myButton[i].setBackgroundColor(myColor[i]);
-            myButton[i].setTextOn("Button " + i + " ON");
-            myButton[i].setTextOff("Button " + i + " OFF");
-            myButton[i].setText(
-                    myButton[i].isChecked() ? myButton[i].getTextOn() : myButton[i].getTextOff()
-            );
+            //myButton[i].setTextOn("Button " + i + " ON");
+            //myButton[i].setTextOff("Button " + i + " OFF");
+            //myButton[i].setText(
+            //        myButton[i].isChecked() ? myButton[i].getTextOn() : myButton[i].getTextOff()
+            //);
             //myButton[i].setBackground(myDrawable);
         }
 
@@ -119,7 +142,7 @@ public class MainActivity extends ActionBarActivity
 
         // Calculate from XML-Display-Metric to native Pixel
         DisplayMetrics dm = getResources().getDisplayMetrics();
-        int px = (int) TypedValue.applyDimension( TypedValue.COMPLEX_UNIT_DIP, 300, dm );
+        int px = (int) TypedValue.applyDimension( TypedValue.COMPLEX_UNIT_DIP, 200, dm );
         int marg = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 3, dm);
 
         // Margins between Fields and Buttons
@@ -136,24 +159,58 @@ public class MainActivity extends ActionBarActivity
         // myView.setMaxWidth(px);
         myView.setMinimumHeight(px);
         myView.setMinimumWidth(px);
+
         myLayout.addView( myView, myParams);
 
         // Configure size and insert ToggleButtons into the Layout
-        for (ToggleButton tb: myButton) {
-            tb.setWidth(px);
-            tb.setHeight(px);
+        for (SVGImageButton tb: myButton) {
+            tb.setMinimumWidth(px);
+            tb.setMinimumHeight(px);
+
             // Ohne View-ID kein Speichern des Status
-            //if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                tb.setId(generateViewId( this ));
-            //} else {
-            //    tb.setId(View.generateViewId());
-            //}
+            tb.setId(generateViewId( this ));
             myLayout.addView(tb, myParams );
+        }
+
+        fillControls( itemSelected );
+
+    }
+
+
+    private void fillControls(int questionNumber) {
+        if ((controler != null) && (controler.questions != null)
+                && (controler.questions.size() > questionNumber)
+                ) {
+            if (myView != null) {
+                myView.setImageAsset(controler.questions.get(questionNumber).questionFile);
+            }
+            if (controler.questions.get(questionNumber).answerFiles != null &&
+                    myButton != null ) {
+                for (int i = 0; i < MAXBUTTONS; i++) {
+                    if (myButton[i] != null) {
+                        if (i < controler.questions.get(questionNumber).answerFiles.size()) {
+
+                        myButton[i].setImageAsset(
+                                controler.questions.get(questionNumber).answerFiles.get(i).answerFile
+                        );
+
+                            myButton[i].setVisibility(View.VISIBLE);
+                        } else {
+                            myButton[i].setVisibility(View.GONE);
+                        }
+                    }
+                }
+            }
+        }
+        else {
+            // Anzeigen, dass es keine gültige ausgewählte Frage gibt!
+            // oder Alternativ die 0te Frage anzeigen.
         }
 
     }
 
-     /**
+
+    /**
      * Generate a value suitable for use in {@link #setId(int)}.
      * This value will not collide with ID values generated at build time by aapt for R.id.
      *
@@ -175,59 +232,6 @@ public class MainActivity extends ActionBarActivity
         }
     }
 
-    private class SvgDrawable extends Drawable {
-
-        private Paint paint;
-        private Paint whitePaint;
-
-        public SvgDrawable() {
-            paint = new Paint();
-            paint.setAntiAlias(true);
-            paint.setStrokeWidth(3);
-            // Foreground-Color: paint.setColor(Color.WHITE);
-            whitePaint = new Paint();
-            whitePaint.setColor(Color.WHITE);
-        }
-
-        @Override
-        public void draw( Canvas canvas) {
-            if (isVisible()) {
-                int height = getBounds().height();
-                int width = getBounds().width();
-                canvas.drawPaint(whitePaint);
-                canvas.drawLine(0, 0, width, height, paint);
-                canvas.drawLine(width, 0, 0, height, paint);
-                /*
-                if (isStateful()) {
-                    int state[] = getState();
-                    if (state != null) {
-                        for (int st:state) {
-                            if (true) {
-                                canvas.drawLine(0, height/2, width, height/2, paint);
-                                canvas.drawLine(width/2, 0, width/2, height, paint);
-                            }
-                        }
-                    }
-                }
-                */
-            }
-        }
-
-        @Override
-        public int getOpacity() {
-            return PixelFormat.TRANSLUCENT;
-        }
-
-        @Override
-        public void setAlpha(int alpha) {
-            paint.setAlpha( alpha );
-        }
-
-        @Override
-        public void setColorFilter(ColorFilter cf) {
-            paint.setColorFilter( cf );
-        }
-    }
 
     @Override
     public void onNavigationDrawerItemSelected(int position) {
@@ -236,6 +240,8 @@ public class MainActivity extends ActionBarActivity
         fragmentManager.beginTransaction()
                 .replace(R.id.container, PlaceholderFragment.newInstance(position + 1))
                 .commit();
+        itemSelected = position;
+        fillControls(itemSelected);
     }
 
     public void onSectionAttached(int number) {

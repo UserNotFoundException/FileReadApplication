@@ -1,0 +1,43 @@
+
+        AssetManager assetManager = this.getActivity().getAssets();
+        BufferedReader reader = null;
+
+        try {
+            // read Content.txt from assets-Directory
+            /*
+            reader = new BufferedReader(
+                        new InputStreamReader(
+                                assetManager.open("Content.txt"),
+                                "UTF-8")
+                    );
+            */
+            // read content.txt from res\raw-Directory
+            /**/
+            reader = new BufferedReader(
+                        new InputStreamReader(
+                                getResources().openRawResource(R.raw.content),
+                                "UTF-8")
+                    );
+            /**/
+
+            while (reader.ready()) {
+                String S = reader.readLine().trim();
+                if (!S.isEmpty()) {
+                    items.add(S);
+                }
+            }
+        }
+        catch (IOException ex) {
+            items.add("Fehler beim Einlesen der Datei Content.txt");
+        }
+        finally {
+            try {
+                if (reader != null) {
+                    reader.close();
+                }
+            }
+            catch (IOException ex) {
+                // do Nothing
+            }
+            reader = null;
+        }
