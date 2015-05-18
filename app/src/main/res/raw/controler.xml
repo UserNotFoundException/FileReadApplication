@@ -1,6 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <fragen>
     <frage>
+        <titel>Beispielfrage 1</titel>
+        <nummer>1</nummer>
+        <datei>f0001.svgz</datei>
+        <type>1</type>
+        <antworten>
+            <antwort>
+                <datei>f0001a1.svg</datei>
+                <richtig>1</richtig>
+            </antwort>
+            <antwort>
+                <datei>f0001a2.svg</datei>
+                <richtig>0</richtig>
+            </antwort>
+            <antwort>
+                <datei>f0001a3.svgz</datei>
+                <richtig>0</richtig>
+            </antwort>
+            <antwort>
+                <datei>f0001a4.svgz</datei>
+                <richtig>0</richtig>
+            </antwort>
+        </antworten>
+    </frage>
+
+    <frage>
         <titel>Beispielfrage 2</titel>
         <nummer>10</nummer>
         <datei>f0002.svgz</datei>
@@ -107,6 +132,12 @@
                 <richtig>0</richtig>
             </antwort>
         </antworten>
+    </frage>
+    <frage>
+        <titel>Langer Preview</titel>
+        <nummer>50</nummer>
+        <datei>preview.svgz</datei>
+        <type>1</type>
     </frage>
 
 </fragen>

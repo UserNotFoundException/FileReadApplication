@@ -2,18 +2,14 @@ package at.cernin.filereadapplication;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.ColorFilter;
-import android.graphics.Paint;
-import android.graphics.PixelFormat;
-import android.graphics.drawable.Drawable;
+import android.os.Bundle;
 import android.os.PersistableBundle;
-import android.support.v7.app.ActionBarActivity;
-import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.os.Bundle;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -22,9 +18,13 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.support.v4.widget.DrawerLayout;
 import android.widget.LinearLayout;
 import android.widget.ToggleButton;
+
+import com.caverock.androidsvg.SVGParseException;
+
+import java.io.IOException;
+
 import static at.cernin.filereadapplication.Configuration.checkDebug;
 
 
@@ -99,7 +99,7 @@ public class MainActivity extends ActionBarActivity
     private SVGImageView myView; // View for Question
     // ToggleButtons for Answers
     private final int MAXBUTTONS = 4;
-    private SVGImageButton myButton[] = new SVGImageButton[ MAXBUTTONS ];
+    private SVGToggleButton myButton[] = new SVGToggleButton[ MAXBUTTONS ];
 
     /*
         Manually designed activity-layout
@@ -118,14 +118,13 @@ public class MainActivity extends ActionBarActivity
         //myView.setBackground(myDrawable);
 
         for (int i = 0; i < MAXBUTTONS; i++) {
-            myButton[i] = new SVGImageButton( this );
+            myButton[i] = new SVGToggleButton( this );
             myButton[i].setBackgroundColor(myColor[i]);
-            //myButton[i].setTextOn("Button " + i + " ON");
-            //myButton[i].setTextOff("Button " + i + " OFF");
-            //myButton[i].setText(
-            //        myButton[i].isChecked() ? myButton[i].getTextOn() : myButton[i].getTextOff()
-            //);
-            //myButton[i].setBackground(myDrawable);
+            myButton[i].setTextOn("Button " + i + " ON");
+            myButton[i].setTextOff("Button " + i + " OFF");
+            myButton[i].setText(
+                    myButton[i].isChecked() ? myButton[i].getTextOn() : myButton[i].getTextOff()
+            );
         }
 
         // configuring the LinearLayout inside the ScrollView
@@ -147,25 +146,28 @@ public class MainActivity extends ActionBarActivity
 
         // Margins between Fields and Buttons
         if (myLayout.getOrientation() == LinearLayout.VERTICAL) {
-            myParams.setMargins( 0, marg, 0, marg);
+            // myParams.setMargins(0, marg, 0, marg);
+            myParams.setMargins(0, 1, 0, 1);
         }
         else {
-            myParams.setMargins( marg, 0, marg, 0);
+            // myParams.setMargins( marg, 0, marg, 0);
+            myParams.setMargins( 1, 0, 1, 0);
         }
+        //myView.setPadding(marg/2, marg, marg/2, marg);
 
 
         // configure Size and insert ImageView into the Layout
         // myView.setMaxHeight(px);
         // myView.setMaxWidth(px);
-        myView.setMinimumHeight(px);
+        myView.setMinimumHeight(px/2);
         myView.setMinimumWidth(px);
 
         myLayout.addView( myView, myParams);
 
         // Configure size and insert ToggleButtons into the Layout
-        for (SVGImageButton tb: myButton) {
+        for (ToggleButton tb: myButton) {
             tb.setMinimumWidth(px);
-            tb.setMinimumHeight(px);
+            tb.setMinimumHeight(px/8);
 
             // Ohne View-ID kein Speichern des Status
             tb.setId(generateViewId( this ));
@@ -181,25 +183,84 @@ public class MainActivity extends ActionBarActivity
         if ((controler != null) && (controler.questions != null)
                 && (controler.questions.size() > questionNumber)
                 ) {
+            DisplayMetrics dm = getResources().getDisplayMetrics();
+            float ratio = 0, widthRatio = 0;
+            float height = 0, sumheight = 0, viewHeight = 0;
+            float width = dm.widthPixels;
+
             if (myView != null) {
-                myView.setImageAsset(controler.questions.get(questionNumber).questionFile);
+                try {
+                    myView.setImageViewAsset(this, controler.questions.get(questionNumber).questionFile);
+                } catch (SVGParseException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                ratio = myView.svg.getDocumentAspectRatio(); // width/height
+                if (ratio > 0) {
+                    height = width / ratio;
+                }
+                else {
+                    height = width;
+                }
+                if (height >= dm.heightPixels) {
+                    height = dm.heightPixels-1;
+                }
+                viewHeight = height;
+                myView.setMinimumHeight((int) height);
+                widthRatio = myView.svg.getDocumentWidth()/(width-4);
+                myView.svg.setDocumentWidth(width - 4);
+                myView.svg.setDocumentHeight(height - 4);
             }
             if (controler.questions.get(questionNumber).answerFiles != null &&
                     myButton != null ) {
                 for (int i = 0; i < MAXBUTTONS; i++) {
                     if (myButton[i] != null) {
                         if (i < controler.questions.get(questionNumber).answerFiles.size()) {
-
-                        myButton[i].setImageAsset(
-                                controler.questions.get(questionNumber).answerFiles.get(i).answerFile
-                        );
+                            try {
+                                myButton[i].setImageViewAsset(this,
+                                        controler.questions.get(questionNumber).answerFiles.get(i).answerFile
+                                );
+                            } catch (SVGParseException e) {
+                                e.printStackTrace();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                            ratio = myButton[i].svg.getDocumentAspectRatio(); // width/height
+                            height = 0;
+                            width = dm.widthPixels;
+                            float wr = myButton[i].svg.getDocumentWidth()/width;
+                            if (wr < widthRatio) {
+                                width = myButton[i].svg.getDocumentWidth()/widthRatio;
+                            }
+                            if (ratio > 0) {
+                                height = width / ratio;
+                            }
+                            else {
+                                height = width;
+                            }
+                            if (height >= dm.heightPixels) {
+                                height = dm.heightPixels-1;
+                            }
+                            myButton[i].setMinimumHeight((int)height);
+                            sumheight += height+5;
+                            myButton[i].svg.setDocumentWidth(width - 4);
+                            myButton[i].svg.setDocumentHeight(height - 4);
 
                             myButton[i].setVisibility(View.VISIBLE);
+                            myButton[i].invalidate();
                         } else {
                             myButton[i].setVisibility(View.GONE);
                         }
                     }
                 }
+            }
+            if (myView != null) {
+                if (sumheight+viewHeight < dm.heightPixels-120) {
+                    viewHeight = dm.heightPixels-120-sumheight;
+                    myView.setMinimumHeight((int)viewHeight);
+                }
+                myView.invalidate();
             }
         }
         else {
