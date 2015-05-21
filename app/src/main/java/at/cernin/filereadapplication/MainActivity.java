@@ -2,7 +2,6 @@ package at.cernin.filereadapplication;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.support.v4.app.Fragment;
@@ -108,28 +107,30 @@ public class MainActivity extends ActionBarActivity
     */
 
     private void setLayoutManualy() {
-        final int[] myColor = {Color.YELLOW,Color.LTGRAY,Color.CYAN,Color.WHITE};
+        //final int[] myColor = {Color.YELLOW,Color.LTGRAY,Color.CYAN,Color.WHITE};
 
         // Image View for SVG-Information
         myView = new SVGImageView( this );
-        myView.setBackgroundColor(Color.GRAY);
+        //myView.setBackgroundColor(Color.GRAY);
         //Drawable myDrawable = new ColorDrawable(Color.GREEN);
         //Drawable myDrawable = new SvgDrawable();
         //myView.setBackground(myDrawable);
 
         for (int i = 0; i < MAXBUTTONS; i++) {
             myButton[i] = new SVGToggleButton( this );
+            /*
             myButton[i].setBackgroundColor(myColor[i]);
             myButton[i].setTextOn("Button " + i + " ON");
             myButton[i].setTextOff("Button " + i + " OFF");
             myButton[i].setText(
                     myButton[i].isChecked() ? myButton[i].getTextOn() : myButton[i].getTextOff()
             );
+            */
         }
 
         // configuring the LinearLayout inside the ScrollView
         LinearLayout myLayout = (LinearLayout) findViewById( R.id.container);
-        myLayout.setBackgroundColor(Color.MAGENTA);
+        //myLayout.setBackgroundColor(Color.MAGENTA);
         myLayout.setOrientation(LinearLayout.VERTICAL);
 
         // LayoutParameter before inserting the ImageView and ToggleButtons
@@ -226,6 +227,9 @@ public class MainActivity extends ActionBarActivity
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
+                            myButton[i].setChecked(
+                                    controler.questions.get(questionNumber).answerFiles.get(i).answerTrue
+                            );
                             ratio = myButton[i].svg.getDocumentAspectRatio(); // width/height
                             height = 0;
                             width = dm.widthPixels;

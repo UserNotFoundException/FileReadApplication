@@ -83,6 +83,7 @@ public class SVGImageView extends ImageView {
              svg.renderToCanvas(canvas, box);
             */
             canvas.translate(widthDiff, heightDiff);
+            canvas.scale(0.95f, 0.95f, canvas.getWidth()/2, canvas.getHeight()/2);
             svg.renderToCanvas(canvas);
         }
         else {

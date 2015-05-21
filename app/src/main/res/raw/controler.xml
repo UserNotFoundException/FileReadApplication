@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <fragen>
     <frage>
         <titel>Beispielfrage 1</titel>
@@ -137,6 +137,12 @@
         <titel>Langer Preview</titel>
         <nummer>50</nummer>
         <datei>preview.svgz</datei>
+        <type>1</type>
+    </frage>
+    <frage>
+        <titel>Gaußsche Glockenkurve</titel>
+        <nummer>60</nummer>
+        <datei>gauss.svg</datei>
         <type>1</type>
     </frage>
 

@@ -3,10 +3,7 @@ package at.cernin.filereadapplication;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.Path;
-import android.graphics.RectF;
 import android.os.Build;
 import android.view.View;
 import android.widget.ToggleButton;
@@ -62,6 +59,8 @@ public class SVGToggleButton extends ToggleButton {
             /**/
             float heightDiff = (canvas.getHeight()-svg.getDocumentHeight())/2;
             float widthDiff = (canvas.getWidth()-svg.getDocumentWidth())/2;
+            float midX = canvas.getWidth()/2;
+            float midY = canvas.getHeight()/2;
             /*
             RectF box = new RectF(
                     widthDiff, heightDiff,
@@ -71,15 +70,21 @@ public class SVGToggleButton extends ToggleButton {
             */
             canvas.save();
             canvas.translate(widthDiff, heightDiff);
+            canvas.scale(0.95f, 0.95f, midX, midY);
             svg.renderToCanvas(canvas);
             canvas.restore();
             if (isChecked()) {
-                heightDiff = canvas.getHeight()/2;
-                widthDiff = canvas.getWidth()/2;
+                float Small = 0.8f * Math.min( midY, midY );
+                float Diff = 0.4f * Small;
+
                 Paint p = new Paint();
                 p.setColor(Color.DKGRAY);
                 p.setAlpha(128);
-                p.setStrokeWidth(5f);
+                p.setStrokeWidth(Diff);
+                p.setStrokeCap(Paint.Cap.ROUND);
+                canvas.drawLine(midX - Small, midY - Small, midX + Small, midY + Small, p);
+                canvas.drawLine( midX-Small, midY+Small, midX+Small, midY-Small, p);
+                /* Momentan Kreuz statt Häckchen
                 // Häckchenen als Pfad definieren
                 Path path = new Path();
                 path.moveTo(0, -7);
@@ -108,6 +113,8 @@ public class SVGToggleButton extends ToggleButton {
                 //canvas.drawRect(widthDiff-20, heightDiff-20, widthDiff+20, heightDiff+20, p);
                 path.computeBounds(s, true); // Nur zum Debuggen
                 canvas.drawPath(path, p);
+                */
+
             }
         } else {
             super.onDraw(canvas);
