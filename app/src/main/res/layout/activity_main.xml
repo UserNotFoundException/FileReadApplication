@@ -12,9 +12,7 @@
         <LinearLayout android:id="@+id/container"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:baselineAligned="false"
-            android:background="#ff9387ff"
-            android:backgroundTint="#fffffc98">
+            android:baselineAligned="false">
 
         </LinearLayout>
     </ScrollView>

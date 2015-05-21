@@ -215,6 +215,17 @@ public class MainActivity extends ActionBarActivity
             }
             if (controler.questions.get(questionNumber).answerFiles != null &&
                     myButton != null ) {
+                boolean singleSelection = false, multipleSelection = false;
+                for (int j = 0; j < controler.questions.get(questionNumber).answerFiles.size();j++) {
+                    if (controler.questions.get(questionNumber).answerFiles.get(j).answerTrue) {
+                        if (singleSelection) {
+                            multipleSelection = true;
+                            break;
+                        } else {
+                            singleSelection = true;
+                        }
+                    }
+                }
                 for (int i = 0; i < MAXBUTTONS; i++) {
                     if (myButton[i] != null) {
                         if (i < controler.questions.get(questionNumber).answerFiles.size()) {
@@ -230,6 +241,7 @@ public class MainActivity extends ActionBarActivity
                             myButton[i].setChecked(
                                     controler.questions.get(questionNumber).answerFiles.get(i).answerTrue
                             );
+                            myButton[i].multipleSelection = multipleSelection;
                             ratio = myButton[i].svg.getDocumentAspectRatio(); // width/height
                             height = 0;
                             width = dm.widthPixels;
@@ -260,8 +272,8 @@ public class MainActivity extends ActionBarActivity
                 }
             }
             if (myView != null) {
-                if (sumheight+viewHeight < dm.heightPixels-120) {
-                    viewHeight = dm.heightPixels-120-sumheight;
+                if (sumheight+viewHeight < dm.heightPixels*7/10) {
+                    viewHeight = dm.heightPixels*7/10-sumheight;
                     myView.setMinimumHeight((int)viewHeight);
                 }
                 myView.invalidate();
