@@ -64,7 +64,8 @@ public class SVGToggleButton extends ToggleButton {
         float midY = canvas.getHeight()/2;
         float stroke = 0.05f * Math.min(width, height);
 
-        canvas.drawColor(Color.WHITE);
+
+        //canvas.drawColor(Color.WHITE);
         Paint frameP = new Paint();
         // Button with Focus ist Black
         if (this.hasFocus()) {
@@ -73,10 +74,12 @@ public class SVGToggleButton extends ToggleButton {
             frameP.setColor(Color.LTGRAY);
         }
         frameP.setStrokeWidth(stroke);
+
         canvas.drawLine(0, 0, width, 0, frameP);
         canvas.drawLine(width, 0, width, height, frameP);
         canvas.drawLine(width, height, 0, height, frameP);
         canvas.drawLine(0, height, 0, 0, frameP);
+
 
         // Draw the Button-Content
         if (null != svg) {

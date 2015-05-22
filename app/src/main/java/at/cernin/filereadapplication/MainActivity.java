@@ -197,26 +197,34 @@ public class MainActivity extends ActionBarActivity
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+                // Bestimme die View-Größe
                 ratio = myView.svg.getDocumentAspectRatio(); // width/height
+                // Lege den View im selben Verhältnis fest, wie die darzustellende Grafik
                 if (ratio > 0) {
                     height = width / ratio;
                 }
-                else {
+                else { // Ratio = 0 bedeutet, sie läßt sich nicht berechnen
                     height = width;
                 }
+                // Die Grafik darf nicht höher als die Bildschirmhöhe werden
                 if (height >= dm.heightPixels) {
                     height = dm.heightPixels-1;
                 }
                 viewHeight = height;
-                myView.setMinimumHeight((int) height);
+                myView.setMinimumHeight((int) viewHeight);
+                // Merken des Verhältnisses von ViewWeite zu Bildweite
+                // damit die Antworten angepaßt werden können
                 widthRatio = myView.svg.getDocumentWidth()/(width-4);
+                // Die Größe der Fragengrafik an den View anpassen.
                 myView.svg.setDocumentWidth(width - 4);
                 myView.svg.setDocumentHeight(height - 4);
             }
-            if (controler.questions.get(questionNumber).answerFiles != null &&
-                    myButton != null ) {
+            if (controler.questions.get(questionNumber).answerFiles != null && myButton != null ) {
                 boolean singleSelection = false, multipleSelection = false;
-                for (int j = 0; j < controler.questions.get(questionNumber).answerFiles.size();j++) {
+                for (int j = 0;
+                     j < controler.questions.get(questionNumber).answerFiles.size();
+                     j++)
+                { // Festlegen ob es eine oder mehrere korrekte Antworten gibt
                     if (controler.questions.get(questionNumber).answerFiles.get(j).answerTrue) {
                         if (singleSelection) {
                             multipleSelection = true;
@@ -241,7 +249,12 @@ public class MainActivity extends ActionBarActivity
                             myButton[i].setChecked(
                                     controler.questions.get(questionNumber).answerFiles.get(i).answerTrue
                             );
+                            // Defaultmäßig hat ein Button ein Drawable als Hintergrund hinterlegt
+                            // das vor dem onDraw gezeichnet wird. Dieses stört bei SVG-Buttons.
+                            myButton[i].setBackground(null);
+                            // Anzeigen von Kreisen oder Vierecken in den Buttons
                             myButton[i].multipleSelection = multipleSelection;
+
                             ratio = myButton[i].svg.getDocumentAspectRatio(); // width/height
                             height = 0;
                             width = dm.widthPixels;
