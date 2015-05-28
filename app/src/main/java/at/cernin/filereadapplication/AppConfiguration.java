@@ -12,7 +12,7 @@ import java.util.GregorianCalendar;
  *
  *
  */
-public class Configuration {
+public class AppConfiguration {
 
     /**
      * Diese Version ist eine Debugversion
@@ -24,7 +24,7 @@ public class Configuration {
     /**
      * Das Produktionsdatum der APP, das zum Jahresvergleich herangezogen wird
      */
-    public static final GregorianCalendar ProductionDate = new GregorianCalendar( 2015, 5, 1);
+    public static final GregorianCalendar ProductionDate = new GregorianCalendar( 2015, 6, 1);
 
 
     /**
@@ -37,7 +37,8 @@ public class Configuration {
      */
     public static boolean checkDebug( Activity activity ) {
 
-        if (!DEBUG) { return true; }
+        if (!DEBUG) { return true;
+        }
 
         if ((System.currentTimeMillis() - 31536000000l) > ProductionDate.getTimeInMillis()) {
             Log.e(activity.getString(R.string.package_name)+":"+activity.getString(R.string.app_name),

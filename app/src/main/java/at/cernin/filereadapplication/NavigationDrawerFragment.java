@@ -1,6 +1,5 @@
 package at.cernin.filereadapplication;
 
-import android.content.res.AssetManager;
 import android.support.v7.app.ActionBarActivity;
 import android.app.Activity;
 import android.support.v7.app.ActionBar;
@@ -23,12 +22,6 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import java.io.BufferedReader;
-import java.io.FileDescriptor;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 
 /**
@@ -102,7 +95,7 @@ public class NavigationDrawerFragment extends Fragment {
 
         ArrayList<String> items = new ArrayList<String>();
 
-        for (Controler.Question q: ((MainActivity)getActivity()).controler.questions) {
+        for (XmlQuestionControler.Question q: ((MainActivity)getActivity()).questionControler.questions) {
             items.add(String.valueOf(q.count).concat(": ").concat(q.titel));
         }
 

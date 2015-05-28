@@ -18,7 +18,7 @@ import java.util.List;
  * liefert die Parameter zum Anzeigen und zur
  * Verwaltung eines Fragendialogs
  */
-public class Controler {
+public class XmlQuestionControler {
 
     /**
      * Array mit allen Fragen und den dazu gehörenden Antworten
@@ -31,7 +31,7 @@ public class Controler {
      */
     private static final String ns = null;
 
-    Controler(Context context, int resourceId) {
+    XmlQuestionControler(Context context, int resourceId) {
         // Einlesen einer JSON-Datei aus den Resourcen
 
         ArrayList<Question> result = null;

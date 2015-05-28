@@ -5,6 +5,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.view.View;
 import android.widget.ToggleButton;
@@ -23,8 +24,15 @@ import java.io.IOException;
  */
 public class SVGToggleButton extends ToggleButton {
 
+    // Die im View verwaltete Vektorgrafik
     public SVG svg = null;
+
+    // Der Knopf wird mit quadrischen Markern
+    // gezeichnet, die eine Mehrfachauswahlmöglichkeit
+    // anzeigen
     public boolean multipleSelection = false;
+
+    SVGButtonListener svgButtonListener = null;
 
 
     public SVGToggleButton(Context context) {
@@ -35,21 +43,81 @@ public class SVGToggleButton extends ToggleButton {
             this.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
         } else {
             // do something for phones running an SDK before HoneyComb
+            //
+            // vermutlich nicht nötig, da es vorher kein Hardwarerendering gab
         }
     }
 
 
-    public void setImageViewAsset(Context context, String filename)
-            throws IOException, SVGParseException {
+    public void setSVGButtonListener( SVGButtonListener svgButtonListener) {
+        this.svgButtonListener = svgButtonListener;
+    }
 
-        svg = SVG.getFromAsset(context.getAssets(), filename);
+
+    // Assynchroner Aufruf der Asset-Datei-Ladefunktion
+    private class AssetParams {
+        Context context;
+        String filename;
+        AssetParams(Context context, String filename) {
+            this.context = context;
+            this.filename = filename;
+        }
+    }
+    private class GetFromAsset extends AsyncTask<AssetParams, Integer, SVG > {
+        protected SVG doInBackground(AssetParams... params) {
+            try {
+                return SVG.getFromAsset(params[0].context.getAssets(), params[0].filename);
+            } catch (SVGParseException e) {
+            } catch (IOException e) {
+            }
+            return null;
+        }
+        protected void onPostExecute(SVG newsvg) {
+            svg = newsvg;
+            if (svgButtonListener != null){
+                svgButtonListener.SVGImageLoaded( SVGToggleButton.this );
+            }
+        }
+    }
+
+    public void setImageViewAsset(Context context, String filename) {
+
+        new GetFromAsset().executeOnExecutor(
+                GetFromAsset.SERIAL_EXECUTOR, new AssetParams(context, filename)
+        );
 
     }
 
-    public void setImageViewRessource(Context context, int resourceId)
-            throws SVGParseException {
+    // Assynchroner Aufruf der Ressourcen-Datei-Ladefunktion
+    private class ResourceParams {
+        Context context;
+        int resourceId;
+        ResourceParams(Context context, int resourceId) {
+            this.context = context;
+            this.resourceId = resourceId;
+        }
+    }
+    private class GetFromResource extends AsyncTask <ResourceParams, Integer, SVG > {
+        protected SVG doInBackground(ResourceParams... params) {
+            try {
+                return SVG.getFromResource(params[0].context, params[0].resourceId);
+            } catch (SVGParseException e) {
+            }
+            return null;
+        }
+        protected void onPostExecute(SVG newsvg) {
+            svg = newsvg;
+            if (svgButtonListener != null){
+                svgButtonListener.SVGImageLoaded( SVGToggleButton.this );
+            }
+        }
+    }
 
-        svg = SVG.getFromResource(context, resourceId);
+    public void setImageViewRessource(Context context, int resourceId) {
+
+        new GetFromResource().executeOnExecutor(
+                GetFromResource.SERIAL_EXECUTOR, new ResourceParams(context, resourceId)
+        );
 
     }
 
@@ -101,6 +169,7 @@ public class SVGToggleButton extends ToggleButton {
             canvas.restore();
 
             // Draw the Checkmark on a button with ist switched on
+            /*
             if (isChecked()) {
                 float Small = 0.8f * Math.min( midX, midY );
                 float Diff = 0.3f * Small;
@@ -112,7 +181,7 @@ public class SVGToggleButton extends ToggleButton {
                 p.setStrokeCap(Paint.Cap.ROUND);
                 canvas.drawLine(midX - Small, midY - Small, midX + Small, midY + Small, p);
                 canvas.drawLine( midX-Small, midY+Small, midX+Small, midY-Small, p);
-                /* Momentan Kreuz statt Häckchen
+                // Momentan Kreuz statt Häckchen
                 // Häckchenen als Pfad definieren
                 Path path = new Path();
                 path.moveTo(0, -7);
@@ -141,33 +210,43 @@ public class SVGToggleButton extends ToggleButton {
                 //canvas.drawRect(widthDiff-20, heightDiff-20, widthDiff+20, heightDiff+20, p);
                 path.computeBounds(s, true); // Nur zum Debuggen
                 canvas.drawPath(path, p);
-                */
+
 
             }
+            */
         } else {
             //super.onDraw(canvas);
         }
-        frameP.setColor(Color.DKGRAY);
-        frameP.setAlpha(96);
-        stroke = Math.min(stroke, width*0.01f);
-        frameP.setStrokeWidth(stroke);
-        frameP.setStyle(Paint.Style.STROKE);
-        if (multipleSelection) {
-            RectF r = new RectF(width*0.07f-3*stroke, midY-3*stroke,
-                    width*0.07f+3*stroke, midY+3*stroke
-            );
-            canvas.drawRect(r, frameP);
-            r.set(width*0.93f-3*stroke, midY-3*stroke,
-                    width*0.93f+3*stroke, midY+3*stroke
-            );
-            canvas.drawRect(r, frameP);
-        } else {
-            canvas.drawCircle(width * 0.07f, midY, 3 * stroke, frameP);
-            canvas.drawCircle(width * 0.93f, midY, 3 * stroke, frameP);
-        }
+
+        Paint p = new Paint();
+        p.setColor(Color.DKGRAY);
+        p.setAlpha(96);
+        p.setStyle(Paint.Style.STROKE);
+        // 0,001 der Breite aber von oben und unten mindestens 5/10 Abstand
+        stroke = Math.min(height*0.1f, width * 0.01f);
+        p.setStrokeWidth(stroke);
+        drawMark(width * 0.07f, midY, 3*stroke, canvas, p);
+        drawMark(width * 0.93f, midY, 3*stroke, canvas, p);
+
     }
 
+    void drawMark( float xPos, float yPos, float size, Canvas canvas, Paint p ) {
 
+        // Draw the Selection-Marks - circle or squere
+        if (multipleSelection) {
+            RectF r = new RectF(xPos - size, yPos - size,
+                    xPos + size, yPos + size
+            );
+            canvas.drawRect(r, p);
+        } else {
+            canvas.drawCircle(xPos, yPos, size, p);
+        }
 
-
+        if (isChecked()) {
+            p.setStrokeCap(Paint.Cap.ROUND);
+            float line = 1.5f * size;
+            canvas.drawLine(xPos - line, yPos - line, xPos + line, yPos + line, p);
+            canvas.drawLine(xPos - line, yPos + line, xPos + line, yPos - line, p);
+        }
+    }
 }

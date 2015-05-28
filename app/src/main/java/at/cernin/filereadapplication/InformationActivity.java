@@ -48,10 +48,10 @@ public class InformationActivity extends ActionBarActivity {
             tv.setText(Integer.toString(pi.versionCode));
             tv = (TextView) findViewById(R.id.txtProduktionsdatum);
             SimpleDateFormat sdf = new SimpleDateFormat("dd'.'MM'.'yyyy");
-            tv.setText(sdf.format(Configuration.ProductionDate.getTime()));
+            tv.setText(sdf.format(AppConfiguration.ProductionDate.getTime()));
         }
         CheckBox chk = (CheckBox) findViewById(R.id.chkDebug);
-        chk.setChecked( Configuration.DEBUG );
+        chk.setChecked( AppConfiguration.DEBUG );
     }
 
     @Override
