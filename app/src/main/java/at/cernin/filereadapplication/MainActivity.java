@@ -3,6 +3,7 @@ package at.cernin.filereadapplication;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.support.v4.app.Fragment;
@@ -19,6 +20,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowInsets;
+import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -292,7 +295,7 @@ public class MainActivity extends ActionBarActivity
         public int limitHeight( int height ) {
             if (height >= dm.heightPixels) {
                 return dm.heightPixels;
-            };
+            }
             return height;
         }
 
@@ -318,29 +321,29 @@ public class MainActivity extends ActionBarActivity
                 if ((answersLayout != null) &&
                         ((ScrollView)answersLayout.getParent()).getVisibility() == ScrollView.VISIBLE)
                 {
-                    return (int) ((dm.widthPixels) / viewCount);
+                    return ((dm.widthPixels) / viewCount);
                 }
                 else {
-                    return (int) ((dm.widthPixels));
+                    return ((dm.widthPixels));
                 }
             }
             else {
-                return (int) dm.widthPixels;
+                return dm.widthPixels;
             }
         }
 
         public int getQuestionHeight() {
             if (landscapeOrientation()) {
-                return (int) dm.heightPixels;
+                return dm.heightPixels;
             }
             else {
                 if ((answersLayout != null) &&
                         ((ScrollView)answersLayout.getParent()).getVisibility() == ScrollView.VISIBLE)
                 {
-                    return (int) (dm.heightPixels) / viewCount;
+                    return (dm.heightPixels) / viewCount;
                 }
                 else {
-                    return (int) dm.heightPixels;
+                    return dm.heightPixels;
                 }
             }
         }
@@ -439,6 +442,47 @@ public class MainActivity extends ActionBarActivity
         private final LinearLayout.LayoutParams myParams;
         public final SVGImageView svgImageView;
 
+        private void fullSizedView(){
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                View dv = getWindow().getDecorView();
+                if (dv != null) {
+                    int uiOptions = View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
+                            // Eines dieser Flags verursacht einen Positionierungsfehler
+                            // der Actionbar beim Ausschalten von FullSizedview
+                            //View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |
+                            //View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
+                            View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
+                            View.SYSTEM_UI_FLAG_FULLSCREEN |
+                            View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+                    dv.setSystemUiVisibility(uiOptions);
+                }
+            }
+            else {
+                getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+                ActionBar ab = getSupportActionBar();
+                if (ab != null) {
+                    ab.hide();
+                }
+            }
+        }
+
+        private void normalSizedView(){
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                View dv = getWindow().getDecorView();
+                if (dv != null) {
+                    int uiOptions = View.SYSTEM_UI_FLAG_VISIBLE;
+                    dv.setSystemUiVisibility(uiOptions);
+                }
+            }
+            else {
+                getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+                ActionBar ab = getSupportActionBar();
+                if (ab != null) {
+                    ab.show();
+                }
+            }
+        }
+
         public QuestionView(LinearLayout myLayout, Display display, Activity activity) {
             // Calculate from XML-Display-Metric to native Pixel
             // int px = display.getDDP(200);
@@ -470,15 +514,30 @@ public class MainActivity extends ActionBarActivity
                      if (answersLayout != null) {
                         if (((ScrollView)(answersLayout.getParent())).getVisibility() == LinearLayout.VISIBLE) {
                             ((ScrollView)(answersLayout.getParent())).setVisibility(LinearLayout.GONE);
+                            fullSizedView();
                         }
                          else {
                             ((ScrollView)(answersLayout.getParent())).setVisibility(LinearLayout.VISIBLE);
+                            normalSizedView();
                         }
                      }
                  }
                                          }
             );
 
+            // OnDetachWindowsListener
+            svgImageView.addOnAttachStateChangeListener( new View.OnAttachStateChangeListener() {
+                     @Override
+                     public void onViewAttachedToWindow(View v) {
+
+                     }
+
+                     @Override
+                     public void onViewDetachedFromWindow(View v) {
+                         normalSizedView();
+                     }
+                 }
+            );
 
             // Die Parameter für zum Einfügen in das Layout feslegen
             // LayoutParameter before inserting the ImageView and ToggleButtons
@@ -803,9 +862,11 @@ public class MainActivity extends ActionBarActivity
 
     public void restoreActionBar() {
         ActionBar actionBar = getSupportActionBar();
-        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
-        actionBar.setDisplayShowTitleEnabled(true);
-        actionBar.setTitle(mTitle);
+        if (actionBar != null) {
+            actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
+            actionBar.setDisplayShowTitleEnabled(true);
+            actionBar.setTitle(mTitle);
+        }
     }
 
 
